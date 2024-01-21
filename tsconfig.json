@@ -1,0 +1,11 @@
+{
+    "include": [
+        "src/**/*.ts"
+    ],
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "skipLibCheck": true,
+        "target": "es5",
+        "esModuleInterop": true
+    }
+}

@@ -2,19 +2,25 @@ import shuffle from "just-shuffle";
 import prompts from "prompts";
 
 async function getCredentials() {
-    const input = await prompts([{
-        type: "text",
-        name: "email",
-        message: "Email",
-        validate: (email: string) => email.length > 3 && email.includes("@") ? true : "Please enter a valid email address"
-    }, {
-        type: "password",
-        name: "password",
-        message: "Password",
-        validate: (password: string) => password.length > 0 ? true : "Please enter a password"
-    }]);
-
-    return input;
+    const input = await prompts([
+        {
+            type: "text",
+            name: "email",
+            message: "Email",
+            validate: (email: string) => email.length > 0 && email.includes("@") ? true : "Please enter an email address"
+        }, {
+            type: "password",
+            name: "password",
+            message: "Password",
+            validate: (password: string) => password.length > 0 ? true : "Please enter a password"
+        }
+    ], {
+        onCancel: () => {
+            console.log("Okay, bye!");
+            process.exit(0);
+        }
+    });
+    return input as { email: string, password: string };
 }
 
 async function login(credentials: { email: string, password: string }) {
