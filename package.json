@@ -2,8 +2,12 @@
   "name": "flatastic-shuffle",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "tsx ."
+  },
   "author": "timvahlbrock",
-  "license": "AGPL-3.0-only"
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "tsx": "^4.7.0"
+  }
 }
