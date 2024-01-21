@@ -84,6 +84,7 @@ async function updateChores(chores: any[], apiKey: string) {
 }
 
 async function main() {
+    console.log("This little terminal program will shuffle the chore order in the flatastic app (flatastic-app.com). The current assignee of each chore will be kept, only the order of all other assignees will be shuffled. Enter e-mail and password and the program will do the rest.");
     const credentials = await getCredentials();
     const apiKey = await login(credentials);
     const chores = await getChores(apiKey);
