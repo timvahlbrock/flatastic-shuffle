@@ -1,18 +1,20 @@
-import * as dotenv from "dotenv";
 import shuffle from "just-shuffle";
+import prompts from "prompts";
 
-function getCredentials() {
-    const envConfig = dotenv.config();
-    if (envConfig.error) throw envConfig.error;
-    if (!envConfig.parsed) throw new Error("No env config parsed");
+async function getCredentials() {
+    const input = await prompts([{
+        type: "text",
+        name: "email",
+        message: "Email",
+        validate: (email: string) => email.length > 3 && email.includes("@") ? true : "Please enter a valid email address"
+    }, {
+        type: "password",
+        name: "password",
+        message: "Password",
+        validate: (password: string) => password.length > 0 ? true : "Please enter a password"
+    }]);
 
-    const email = envConfig.parsed.FLATASTIC_EMAIL;
-    const password = envConfig.parsed.FLATASTIC_PASSWORD;
-
-    if (!email) throw new Error("No username found");
-    if (!password) throw new Error("No password found");
-
-    return { email, password };
+    return input;
 }
 
 async function login(credentials: { email: string, password: string }) {
@@ -53,8 +55,8 @@ async function updateChores(chores: any[], apiKey: string) {
         let firstUser = userOrder.shift()!;
         let newOrder = [firstUser, ...shuffle(userOrder)];
         console.log("Updating: " + chore.title);
-        console.log("Old order: " + chore.users.join(", "));
-        console.log("New order: " + newOrder.join(", "));
+        // console.log("Old order: " + chore.users.join(", "));
+        // console.log("New order: " + newOrder.join(", "));
         const body = JSON.stringify({
             id: chore.id,
             users: newOrder,
@@ -71,11 +73,12 @@ async function updateChores(chores: any[], apiKey: string) {
         if (!response.ok) {
             throw new Error(`Failed to update '${chore.title}:' ` + await response.text());
         }
+        console.log(`Updated '${chore.title}' successfully`);
     }
 }
 
 async function main() {
-    const credentials = getCredentials();
+    const credentials = await getCredentials();
     const apiKey = await login(credentials);
     const chores = await getChores(apiKey);
     await updateChores(chores, apiKey);
