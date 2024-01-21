@@ -1,0 +1,9 @@
+{
+  "name": "flatastic-shuffle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "timvahlbrock",
+  "license": "AGPL-3.0-only"
+}
