@@ -4,7 +4,7 @@
   "description": "",
   "bin": "./dist/flatastic-shuffle.umd.js",
   "scripts": {
-    "start": "tsx .",
+    "start": "tsx src",
     "build": "tsc --noEmit -p . && vite build",
     "prepackage": "npm run build",
     "package": "pkg ."

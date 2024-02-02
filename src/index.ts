@@ -54,11 +54,50 @@ async function getChores(apiKey: string) {
     return choresResponse.json();
 }
 
+async function getWg(apiKey: string) {
+    const choresResponse = await fetch("https://api.flatastic-app.com/index.php/api/wg", {
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey
+        }
+    });
 
-async function updateChores(chores: any[], apiKey: string) {
+    if (!choresResponse.ok)
+        throw new Error("Failed to fetch flatmates: " + await choresResponse.text());
+
+    return choresResponse.json();
+}
+
+async function askChoresToUpdate(chores: any[]) {
+    const padLength = Math.max(...chores.map(chore => chore.title.length)) + 5;
+    const { choresToUpdate } = await prompts({
+        type: "multiselect",
+        name: "choresToUpdate",
+        message: "Which chores do you want to update?",
+        choices: chores.map(chore => ({ title: `${chore.title.padEnd(padLength)} ${chore.users.length} users`, value: chore }))
+    });
+    return choresToUpdate;
+}
+
+function getFlatmatesWithoutChores(chores: any[], flatmates: any[]): any[] {
+    return flatmates.filter(flatmate => chores.every(chore => !chore.users.includes(parseInt(flatmate.id))));
+}
+
+async function askUnassignedUsersToMixIn(unassignedUsers: any[]) {
+    const { usersToMixIn } = await prompts({
+        type: "multiselect",
+        name: "usersToMixIn",
+        message: "The following users currently have no chores. Which ones do you want to mix in?",
+        choices: unassignedUsers.map(u => ({ title: u.firstName + (u.lastName || ""), value: u }))
+    });
+    return usersToMixIn;
+}
+
+async function updateChores(chores: any[], unassignedUsersToMixIn: any[], apiKey: string) {
     for (const chore of chores) {
         let userOrder: number[] = Array.from(chore.users);
         let firstUser = userOrder.shift()!;
+        userOrder.push(...unassignedUsersToMixIn.map(u => u.id));
         let newOrder = [firstUser, ...shuffle(userOrder)];
         console.log("Updating: " + chore.title);
         // console.log("Old order: " + chore.users.join(", "));
@@ -88,7 +127,12 @@ async function main() {
     const credentials = await getCredentials();
     const apiKey = await login(credentials);
     const chores = await getChores(apiKey);
-    await updateChores(chores, apiKey);
+    const wg = await getWg(apiKey);
+
+    const choresToUpdate = await askChoresToUpdate(chores);
+    const unassignedUsers = getFlatmatesWithoutChores(choresToUpdate, wg.flatmates);
+    const unassignedUsersToMixIn = await askUnassignedUsersToMixIn(unassignedUsers);
+    await updateChores(choresToUpdate, unassignedUsersToMixIn, apiKey);
 }
 
 main().catch(e => console.error(e));
